@@ -13,8 +13,8 @@ app.set('views', './views')
 app.set('view engine', 'pug');
 
 app.get('/', site.index);
-app.route('/:snippet').get(snippet.index.bind(snippet)).post(snippet.save.bind(snippet))
-app.get('/:snippet/:version', snippet.version.bind(snippet)).post(snippet.save.bind(snippet))
+app.route('/:snippet').get(snippet.load.bind(snippet)).post(snippet.save.bind(snippet))
+app.route('/:snippet/:version').get(snippet.load.bind(snippet)).post(snippet.save.bind(snippet))
 
 app.listen(config.port, function () {
   console.log('Example app listening on port ' + config.port);

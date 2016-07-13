@@ -57,8 +57,17 @@ var _getSnippetDir = function (store, snippet, version) {
   return store + "/" + id + "/" + version
 }
 
+var _getLatestVersion = function (store, snippet, callback) {
+  var store = store
+  var id = parseInt(snippet, 36);
+  fs.readdir("/Users/vdua/work/ajvplayground/data/1468431141274", (err, files) => {
+    if (err) throw err;
+    var x = files.map( (f) => { return +f}).sort()[files.length - 1]
+    callback(x);
+  })
+}
+
 var _resolvedFileMap = function (dir, fileMap) {
-  console.log(fileMap);
   return Object.keys(fileMap).map((key) => {
     return {
       name : key,
@@ -83,28 +92,43 @@ Snippet.prototype._createSnippet = function (snippet, data, callback) {
   _saveFiles(_resolvedFileMap(dir, this.config.fileNames), data, callback)
 }
 
-Snippet.prototype.index = function (req, res) {
-  this._loadSnippet(req.params.snippet, 1, (data) => {
-    console.log(data);
+Snippet.prototype._updateSnippet = function (snippet, version, data, callback) {
+  _getLatestVersion(this.config.store, snippet, (latest) => {
+    if (version <= latest) {
+      version = latest + 1;
+      dir = _getSnippetDir(this.config.store, snippet, version);
+      mkdirp.sync(dir);
+      console.log("directory created" + dir);
+      _saveFiles(_resolvedFileMap(dir, this.config.fileNames), data, () => {
+          callback(version);
+      })
+    } else {
+      callback(version)
+    }
+  })
+}
+
+Snippet.prototype.load = function (req, res) {
+  this._loadSnippet(req.params.snippet, req.params.version || 1, (data) => {
     res.render("index", data);
   });
 }
 
-Snippet.prototype.version = function (req, res) {
-  this._getSnippet(req.params.snippet, req.params.version, res);
-}
-
 Snippet.prototype.save = function (req, res) {
   var snippetName = req.params.snippet;
+  var snippet;
   if (snippetName == "new") {
     var time = new Date().getTime();
-    var snippet = time.toString(36);
-    console.log("saving");
-    console.log(req.body);
-    var data = _.extend({}, req.params, req.body);
-    console.log(data);
+    snippet = time.toString(36);
+    var data = _.extend({}, req.body);
     this._createSnippet(snippet, data, () => {
       res.redirect("/"+snippet);
+    });
+  } else {
+    var version = req.params.version || 1;
+    var data = _.extend({}, req.body);
+    this._updateSnippet(snippetName, version, data, (version) => {
+      res.redirect("/" + snippetName + "/" + version);
     });
   }
 }

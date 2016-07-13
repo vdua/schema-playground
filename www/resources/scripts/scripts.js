@@ -1,7 +1,7 @@
 (function () {
   var ajv = new Ajv();
 
-  var existingData = {};
+  var existingData = false;
 
   var submitData = function (url, data) {
     var $form = $("<form>").attr({
@@ -20,7 +20,7 @@
   var save = function () {
     var snippetName = existingData.snippetName || "new"
     var version = existingData.version || 0
-    var url = "/" + snippetName + (version ? "/" + version : "")
+    var url = existingData ? "" : "/" + snippetName + (version ? "/" + version : "")
     submitData(url, {
       schema : schemaEditor.getValue(),
       data : dataEditor.getValue()
@@ -44,15 +44,16 @@
   var schemaEditor, dataEditor;
 
   $(function () {
-
     schemaEditor = createEditor("schema-editor");
     dataEditor = createEditor("data-editor");
     var schema = $("#container").attr("data-schema");
     if (schema !== undefined) {
+      existingData = true;
       schemaEditor.setValue(schema)
     }
     schema = $("#container").attr("data-data");
     if (schema !== undefined) {
+      existingData = true;
       dataEditor.setValue(schema)
     }
 
