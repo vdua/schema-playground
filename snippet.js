@@ -6,28 +6,42 @@ var Snippet = function (config, cli) {
   this.cli = cli;
 }
 
-var _loadFiles = function (fileMap, callback) {
-  var j, i = fileMap.length;
-  result = {}
-  var callfn = function () {
-    i--;
-    if (i == 0) {
-      callback(result);
-    }
-  }
-  fileMap.forEach((fm) => {
-    fs.stat(fm.path, (err, data) => {
+var readFile = function (fm, fail) {
+  return new Promise((resolve, reject) => {
+    var result = {}
+    fs.readFile(fm.path, "utf8", (err, data) => {
       if (err) {
-        callfn();
-      } else {
-        fs.readFile(fm.path, "utf8", (err, data) => {
-          if (err) throw err;
-          result[fm.name] = data;
-          callfn();
+        if (!fail) return resolve();
+        return reject({
+          filename : fm.name,
+          err : err,
+          status : 500
         });
       }
-    })
-  });
+      result[fm.name] = data;
+      resolve(result);
+    });
+  })
+}
+
+var _loadFiles = function (fileMap) {
+  return new Promise( (resolve, reject) => {
+    Promise.all(fileMap.map((fm) => {
+          return readFile(fm, false)
+        }))
+      .then(
+        (values) => {
+          var reduced = values.reduce(
+            (prev, curr) => {
+              return _.extend(prev,curr)
+            },
+            {})
+            resolve(reduced)
+      })
+      .catch((err) => {
+        reject(err);
+      })
+  })
 }
 
 var _saveFiles = function (fileMap, data, callback) {
@@ -60,7 +74,7 @@ var _getSnippetDir = function (store, snippet, version) {
 var _getLatestVersion = function (store, snippet, callback) {
   var store = store
   var id = parseInt(snippet, 36);
-  fs.readdir("/Users/vdua/work/ajvplayground/data/1468431141274", (err, files) => {
+  fs.readdir(store + "/" + id, (err, files) => {
     if (err) throw err;
     var x = files.map( (f) => { return +f}).sort()[files.length - 1]
     callback(x);
@@ -76,12 +90,25 @@ var _resolvedFileMap = function (dir, fileMap) {
   });
 }
 
-Snippet.prototype._loadSnippet = function (snippet, version, callback) {
+Snippet.prototype._loadSnippet = function (snippet, version) {
   var dir = _getSnippetDir(this.config.store, snippet, version);
   var self = this;
-  fs.stat(dir, (err, stats) => {
-    if (err) throw err;
-    _loadFiles(_resolvedFileMap(dir, self.config.fileNames), callback)
+  return new Promise((resolve, reject) => {
+    fs.stat(dir, (err, stats) => {
+      if (err) reject({
+        msg : "Unable to locate the requested snippet",
+        err : err,
+        status : 404
+      });
+      var map = _resolvedFileMap(dir, self.config.fileNames);
+      _loadFiles(map).then((val) => {
+          resolve(val);
+        })
+        .catch((err) => {
+          err.msg = "unable to read " + err.filename + " for snippet"
+          reject(err);
+        })
+    });
   })
 }
 
@@ -108,10 +135,12 @@ Snippet.prototype._updateSnippet = function (snippet, version, data, callback) {
   })
 }
 
-Snippet.prototype.load = function (req, res) {
-  this._loadSnippet(req.params.snippet, req.params.version || 1, (data) => {
-    res.render("index", data);
-  });
+Snippet.prototype.load = function (req, res, next) {
+  this._loadSnippet(req.params.snippet, req.params.version || 1)
+    .then( (data) => {
+      res.render("index", data);
+    })
+    .catch((err) => { next(err) });
 }
 
 Snippet.prototype.save = function (req, res) {
