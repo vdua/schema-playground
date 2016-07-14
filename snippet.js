@@ -32,36 +32,41 @@ var _loadFiles = function (fileMap) {
       .then(
         (values) => {
           var reduced = values.reduce(
-            (prev, curr) => {
-              return _.extend(prev,curr)
-            },
-            {})
-            resolve(reduced)
-      })
+                          (prev, curr) => {
+                            return _.extend(prev,curr)
+                          },
+                          {});
+          resolve(reduced)
+        })
       .catch((err) => {
         reject(err);
       })
   })
 }
 
-var _saveFiles = function (fileMap, data, callback) {
-  var j, i = fileMap.length;
-  var callfn = function () {
-    i--;
-    if (i == 0) {
-      callback();
+var saveFile = function (fm, data) {
+  var handler = function (resolve, reject) {
+    if (data === undefined) {
+      return resolve();
     }
+    fs.writeFile(fm.path, data, (err, data) => {
+      if (err) return reject({
+        err : err,
+        filename : fm.name,
+        status : 500
+      });
+      resolve();
+    })
   }
-  fileMap.forEach((fm) => {
-    if (data[fm.name] !== undefined) {
-      fs.writeFile(fm.path, data[fm.name], (err, data) => {
-        if (err) throw err;
-        callfn();
-      })
-    } else {
-      callfn();
-    }
-  });
+  return new Promise(handler)
+}
+
+var _saveFiles = function (fileMap, data, callback) {
+  return Promise.all(
+    fileMap.map((fm) => {
+      return saveFile(fm, data[fm.name]);
+    })
+  )
 }
 
 var _getSnippetDir = function (store, snippet, version) {
@@ -71,14 +76,21 @@ var _getSnippetDir = function (store, snippet, version) {
   return store + "/" + id + "/" + version
 }
 
-var _getLatestVersion = function (store, snippet, callback) {
+var _getLatestVersion = function (store, snippet) {
   var store = store
   var id = parseInt(snippet, 36);
-  fs.readdir(store + "/" + id, (err, files) => {
-    if (err) throw err;
-    var x = files.map( (f) => { return +f}).sort()[files.length - 1]
-    callback(x);
-  })
+  var promiseHandler = function (resolve, reject) {
+    fs.readdir(store + "/" + id, (err, files) => {
+      if (err) return reject({
+        err :err,
+        message : "snippet doesn't exist",
+        status : 404
+      });
+      var x = files.map( (f) => { return +f}).sort()[files.length - 1]
+      resolve(x);
+    })
+  }
+  return new Promise(promiseHandler);
 }
 
 var _resolvedFileMap = function (dir, fileMap) {
@@ -116,23 +128,35 @@ Snippet.prototype._createSnippet = function (snippet, data, callback) {
   var dir = _getSnippetDir(this.config.store, snippet);
   mkdirp.sync(dir);
   console.log("directory created" + dir);
-  _saveFiles(_resolvedFileMap(dir, this.config.fileNames), data, callback)
+  return _saveFiles(_resolvedFileMap(dir, this.config.fileNames), data)
 }
 
-Snippet.prototype._updateSnippet = function (snippet, version, data, callback) {
-  _getLatestVersion(this.config.store, snippet, (latest) => {
-    if (version <= latest) {
+Snippet.prototype._updateSnippet = function (snippet, version, data) {
+  var self = this;
+  var promiseHandler = function (resolve, reject) {
+    _getLatestVersion(self.config.store, snippet)
+    .then((latest) => {
+      if (version > latest) {
+        return resolve(version)
+      }
       version = latest + 1;
-      dir = _getSnippetDir(this.config.store, snippet, version);
+      dir = _getSnippetDir(self.config.store, snippet, version);
       mkdirp.sync(dir);
       console.log("directory created" + dir);
-      _saveFiles(_resolvedFileMap(dir, this.config.fileNames), data, () => {
-          callback(version);
+      _saveFiles(_resolvedFileMap(dir, self.config.fileNames), data)
+      .then(() => {
+        resolve(version);
       })
-    } else {
-      callback(version)
-    }
-  })
+      .catch((err) => {
+        err.message = "unable to save " + err.filename + " of snippet";
+        reject(err);
+      })
+    })
+    .catch((err) => {
+      reject(err)
+    })
+  }
+  return new Promise(promiseHandler);
 }
 
 Snippet.prototype.load = function (req, res, next) {
@@ -140,25 +164,29 @@ Snippet.prototype.load = function (req, res, next) {
     .then( (data) => {
       res.render("index", data);
     })
-    .catch((err) => { next(err) });
+    .catch(next);
 }
 
-Snippet.prototype.save = function (req, res) {
+Snippet.prototype.save = function (req, res, next) {
   var snippetName = req.params.snippet;
   var snippet;
   if (snippetName == "new") {
     var time = new Date().getTime();
     snippet = time.toString(36);
     var data = _.extend({}, req.body);
-    this._createSnippet(snippet, data, () => {
-      res.redirect("/"+snippet);
-    });
+    this._createSnippet(snippet, data)
+        .then( () => {
+            res.redirect("/"+snippet);
+          })
+        .catch(next)
   } else {
     var version = req.params.version || 1;
     var data = _.extend({}, req.body);
-    this._updateSnippet(snippetName, version, data, (version) => {
-      res.redirect("/" + snippetName + "/" + version);
-    });
+    this._updateSnippet(snippetName, version, data)
+        .then((version) => {
+            res.redirect("/" + snippetName + "/" + version);
+          })
+        .catch(next);
   }
 }
 

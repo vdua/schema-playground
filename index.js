@@ -16,7 +16,10 @@ app.get('/', site.index);
 app.route('/:snippet').get(snippet.load.bind(snippet)).post(snippet.save.bind(snippet))
 app.route('/:snippet/:version').get(snippet.load.bind(snippet)).post(snippet.save.bind(snippet))
 app.use(function(err, req, res, next) {
-  console.error(err.err.stack);
+  console.error(err);
+  if (err.err) {
+    console.error(err.err.stack);
+  }
   res.status(err.status).send(err.msg);
 });
 app.listen(config.port, function () {
