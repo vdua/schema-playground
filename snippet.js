@@ -86,7 +86,8 @@ var _getLatestVersion = function (store, snippet) {
         message : "snippet doesn't exist",
         status : 404
       });
-      var x = files.map( (f) => { return +f}).sort()[files.length - 1]
+      var compare = function (a,b) { return a - b;}
+      var x = files.map( (f) => { return +f}).sort(compare)[files.length - 1]
       resolve(x);
     })
   }
@@ -160,11 +161,19 @@ Snippet.prototype._updateSnippet = function (snippet, version, data) {
 }
 
 Snippet.prototype.load = function (req, res, next) {
-  this._loadSnippet(req.params.snippet, req.params.version || 1)
-    .then( (data) => {
-      res.render("index", data);
-    })
-    .catch(next);
+  var version = req.params.version
+  if (!version) {
+    _getLatestVersion(this.config.store, req.params.snippet)
+    .then((version) => {
+      res.redirect("/" + req.params.snippet + "/" + version)
+    }).catch(next);
+  } else {
+    this._loadSnippet(req.params.snippet, version)
+      .then( (data) => {
+        res.render("index", data);
+      })
+      .catch(next);
+  }
 }
 
 Snippet.prototype.save = function (req, res, next) {
@@ -181,6 +190,7 @@ Snippet.prototype.save = function (req, res, next) {
         .catch(next)
   } else {
     var version = req.params.version || 1;
+    console.log(version + " update request " + snippetName);
     var data = _.extend({}, req.body);
     this._updateSnippet(snippetName, version, data)
         .then((version) => {

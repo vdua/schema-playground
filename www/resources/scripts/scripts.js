@@ -1,5 +1,7 @@
 (function () {
-  var ajv = new Ajv();
+  var ajv = new Ajv({
+    allErrors : true
+  });
 
   var existingData = false;
 
@@ -23,7 +25,8 @@
     var url = existingData ? "" : "/" + snippetName + (version ? "/" + version : "")
     submitData(url, {
       schema : schemaEditor.getValue(),
-      data : dataEditor.getValue()
+      data : dataEditor.getValue(),
+      form : formEditor.getValue()
     });
   }
 
@@ -31,6 +34,8 @@
     var editor = ace.edit(id);
     editor.setTheme("ace/theme/monokai");
     editor.getSession().setMode("ace/mode/json");
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
     editor.commands.addCommand({
       name: 'myCommand',
       bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
@@ -41,11 +46,23 @@
     });
     return editor;
   }
-  var schemaEditor, dataEditor;
+
+  var validate = function () {
+    var schema = JSON.parse(schemaEditor.getValue())
+    var data = JSON.parse(dataEditor.getValue())
+    var result = ajv.validate(schema, data);
+    console.log(result);
+    if (!result) {
+      console.log(ajv.errors)
+    }
+  }
+
+  var schemaEditor, dataEditor, formEditor
 
   $(function () {
     schemaEditor = createEditor("schema-editor");
     dataEditor = createEditor("data-editor");
+    formEditor = createEditor("form-editor")
     var schema = $("#container").attr("data-schema");
     if (schema !== undefined) {
       existingData = true;
@@ -56,12 +73,22 @@
       existingData = true;
       dataEditor.setValue(schema)
     }
+    schema = $("#container").attr("data-form");
+    if (schema !== undefined) {
+      existingData = true;
+      formEditor.setValue(schema)
+    }
 
     $("#validate").click(function (e) {
-      var schema = JSON.parse(schemaEditor.getValue())
-      var data = JSON.parse(dataEditor.getValue())
-      var results = ajv.validate(schema, data);
-      console.log(results);
+      validate();
+    });
+
+    $("#save").click(function (e) {
+      save();
+    });
+
+    $("#new").click(function (e) {
+      window.location.href="/";
     })
   })
 }())

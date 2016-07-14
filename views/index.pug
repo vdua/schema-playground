@@ -5,26 +5,27 @@ head
   link(rel="stylesheet", type="text/css", href="/resources/third-party/bootstrap/css/bootstrap.css")
   link(rel="stylesheet", href="/resources/styles/styles.css", media="screen", title="no title")
 body
-  .container#container(data-schema= schema, data-data= data)
-    h1 Validation Playground
-    .row
-      .col-md-6
-        ul.nav.nav-tabs
-          li.active
-            a(href="#schema", data-toggle="tab") Schema
-          li
-            a(href="#data", data-toggle="tab") Data
-    .row
-      .col-md-6
-        .tab-content
-          #schema.active.tab-pane
-            h2 Schema
-            #schema-editor.editor
-          #data.tab-pane
-            h2 Data
-            #data-editor.editor
-      .col-md-6#form
+  .container#container(data-schema= schema, data-data= data, data-form= form)
+    .row#header
+      .col-md-1
         button.btn.btn-primary#validate(type="button",  name="button") Validate
+      .col-md-1
+        button.btn.btn-primary#save(type="button",  name="button") Save
+      .col-md-1
+        button.btn.btn-primary#new(type="button",  name="button") New
+    .row
+      .col-md-4
+        #schema
+          h2 Schema
+          #schema-editor.editor
+      .col-md-4
+        #data
+          h2 Data
+          #data-editor.editor
+      .col-md-4
+        #data
+          h2 Form
+          #form-editor.editor
   script(src="/resources/third-party/ace/ace.js", charset="utf-8")
   script(src="/resources/third-party/jquery/jquery.js", charset="utf-8")
   script(src="/resources/third-party/bootstrap/js/bootstrap.js", charset="utf-8")
