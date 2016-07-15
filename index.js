@@ -13,8 +13,10 @@ app.set('views', './views')
 app.set('view engine', 'pug');
 
 app.get('/', site.index);
+app.get('/list', snippet.list.bind(snippet));
 app.route('/:snippet').get(snippet.load.bind(snippet)).post(snippet.save.bind(snippet))
 app.route('/:snippet/:version').get(snippet.load.bind(snippet)).post(snippet.save.bind(snippet))
+
 app.use(function(err, req, res, next) {
   console.error(err);
   if (err.err) {

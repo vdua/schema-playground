@@ -1,0 +1,9 @@
+doctype html
+head
+  meta(charset="utf-8")
+  title List of Snippets
+body
+  ul
+    each snippet in snippets
+      li
+        a(href= snippet) http://localhost:8080/#{snippet}

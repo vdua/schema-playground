@@ -200,6 +200,23 @@ Snippet.prototype.save = function (req, res, next) {
   }
 }
 
+Snippet.prototype.list = function (req, res, next) {
+  fs.readdir(this.config.store, (err, files) => {
+    if (err) {
+      return next({
+        err : err,
+        msg : "no data exist",
+        status : 404
+      });
+    }
+    console.log(files);
+    var f = files.map((file) => {return (+file).toString(36)});
+    console.log(f);
+    res.render('list', {snippets : f})
+  })
+}
+
+
 exports.snippet = function (config, cli) {
   return new Snippet(config, cli);
 }

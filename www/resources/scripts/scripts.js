@@ -57,8 +57,6 @@
     }
   }
 
-  var schemaEditor, dataEditor, formEditor
-
   $(function () {
     schemaEditor = createEditor("schema-editor");
     dataEditor = createEditor("data-editor");
