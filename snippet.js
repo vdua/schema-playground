@@ -165,12 +165,12 @@ Snippet.prototype.load = function (req, res, next) {
   if (!version) {
     _getLatestVersion(this.config.store, req.params.snippet)
     .then((version) => {
-      res.redirect("/" + req.params.snippet + "/" + version)
+      res.redirect(this.config.root + "/" + req.params.snippet + "/" + version)
     }).catch(next);
   } else {
     this._loadSnippet(req.params.snippet, version)
       .then( (data) => {
-        res.render("index", data);
+        res.render(this.config.views.index, data);
       })
       .catch(next);
   }
@@ -179,13 +179,14 @@ Snippet.prototype.load = function (req, res, next) {
 Snippet.prototype.save = function (req, res, next) {
   var snippetName = req.params.snippet;
   var snippet;
+  var self = this;
   if (snippetName == "new") {
     var time = new Date().getTime();
     snippet = time.toString(36);
     var data = _.extend({}, req.body);
     this._createSnippet(snippet, data)
         .then( () => {
-            res.redirect("/"+snippet);
+            res.redirect(this.config.root + "/"+snippet);
           })
         .catch(next)
   } else {
@@ -194,13 +195,14 @@ Snippet.prototype.save = function (req, res, next) {
     var data = _.extend({}, req.body);
     this._updateSnippet(snippetName, version, data)
         .then((version) => {
-            res.redirect("/" + snippetName + "/" + version);
+            res.redirect(this.config.root + "/" + snippetName + "/" + version);
           })
         .catch(next);
   }
 }
 
 Snippet.prototype.list = function (req, res, next) {
+  console.log('here');
   fs.readdir(this.config.store, (err, files) => {
     if (err) {
       return next({
@@ -212,7 +214,7 @@ Snippet.prototype.list = function (req, res, next) {
     console.log(files);
     var f = files.map((file) => {return (+file).toString(36)});
     console.log(f);
-    res.render('list', {snippets : f})
+    res.render(this.config.views.list, {snippets : f})
   })
 }
 

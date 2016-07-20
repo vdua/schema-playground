@@ -13,13 +13,30 @@ Config.prototype = {
     return this.config.data.startsWith("/") ? this.config.data
             : __dirname + "/" + this.config.data
   },
-  
+
   get fileNames() {
     return this.config.fileNames
+  },
+
+  get root() {
+    return this.config.root ? "/" + this.config.root : ""
+  },
+
+  get views() {
+    return this.config.views || {
+      path : "views",
+      index : "index",
+      list : "list"
+    }
+  },
+
+  get resources() {
+    return this.config.resources
   }
 }
 
-exports.loadConfig = function (file) {
-  var file = file || "config.yaml";
+exports.loadConfig = function (path) {
+  path = path || "."
+  var file = path + "/" + "config.yaml";
   return new Config(file);
 }
