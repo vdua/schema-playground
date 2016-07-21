@@ -33,6 +33,11 @@ Config.prototype = {
 
   get static() {
     return this.config.static;
+  },
+
+  get tutStore() {
+    return this.config.tutStore.startsWith("/") ? this.config.tutStore : (
+      this.path + "/" + this.config.tutStore)
   }
 }
 

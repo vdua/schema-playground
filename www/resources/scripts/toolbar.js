@@ -1,5 +1,22 @@
 (function() {
 
+  var _submitData = function(url, data, method) {
+    method = method || "POST";
+    var $form = $("<form>").attr({
+      "action": url,
+      "method": "POST"
+    });
+    if (typeof data === "object" && data != null) {
+      var inputs = Object.keys(data).map(function(k) {
+        return $('<input type="hidden"/>').attr({
+          name: k,
+          value: data[k]
+        });
+      })
+      $form.append(inputs).appendTo("body")[0].submit();
+    }
+  }
+
   var toolbarControls = {
     new: function(e) {
       window.location.href = "/";
@@ -23,6 +40,16 @@
         })
         $form.append(inputs).appendTo("body")[0].submit();
       }
+    },
+
+    tutorial: function(e) {
+      var $el = $(e.target);
+      var url = "/tutorial";
+      var data = {
+        snippet: $el.attr("data-snippet"),
+        order: "*"
+      }
+      _submitData(url, data);
     }
   };
 

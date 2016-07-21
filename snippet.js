@@ -209,6 +209,7 @@ Snippet.prototype.load = function(req, res, next) {
       .then((result) => {
         res.render(this.config.views.index, {
           snippet: result.data,
+          snippetName: req.params.snippet,
           snippetUrl: self.config.root + "/" + result.url
         });
       })
@@ -226,7 +227,7 @@ Snippet.prototype.save = function(req, res, next) {
     var data = _.extend({}, req.body);
     this._createSnippet(snippet, data)
       .then(() => {
-        res.redirect(this.config.root + "/" + snippet);
+        res.redirect(self.config.root + "/" + snippet);
       })
       .catch(next)
   } else {
@@ -235,7 +236,7 @@ Snippet.prototype.save = function(req, res, next) {
     var data = _.extend({}, req.body);
     this._updateSnippet(snippetName, version, data)
       .then((version) => {
-        res.redirect(this.config.root + "/" + snippetName + "/" + version);
+        res.redirect(self.config.root + "/" + snippetName + "/" + version);
       })
       .catch(next);
   }
