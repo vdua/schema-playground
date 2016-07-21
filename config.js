@@ -1,6 +1,7 @@
 const yaml = require('yamljs');
 
-var Config = function (configFile) {
+var Config = function(path, configFile) {
+  this.path = path
   this.config = yaml.load(configFile);
 }
 
@@ -10,8 +11,8 @@ Config.prototype = {
   },
 
   get store() {
-    return this.config.data.startsWith("/") ? this.config.data
-            : __dirname + "/" + this.config.data
+    return this.config.data.startsWith("/") ? this.config.data : (this.path +
+      "/" + this.config.data)
   },
 
   get fileNames() {
@@ -24,9 +25,9 @@ Config.prototype = {
 
   get views() {
     return this.config.views || {
-      path : "views",
-      index : "index",
-      list : "list"
+      path: "views",
+      index: "index",
+      list: "list"
     }
   },
 
@@ -35,8 +36,8 @@ Config.prototype = {
   }
 }
 
-exports.loadConfig = function (path) {
+exports.loadConfig = function(path) {
   path = path || "."
   var file = path + "/" + "config.yaml";
-  return new Config(file);
+  return new Config(path, file);
 }
