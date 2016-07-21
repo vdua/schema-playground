@@ -135,7 +135,10 @@ Snippet.prototype._loadSnippet = function(snippet, version) {
       });
       var map = _resolvedFileMap(dir, self.config.fileNames, version);
       _loadFiles(map).then((val) => {
-          resolve(val, snippet + "/" + version);
+          resolve({
+            data: val,
+            url: snippet + "/" + version
+          });
         })
         .catch((err) => {
           err.msg = "unable to read " + err.filename +
@@ -184,7 +187,8 @@ Snippet.prototype._updateSnippet = function(snippet, version, data) {
 }
 
 Snippet.prototype.load = function(req, res, next) {
-  var version = req.params.version
+  var version = req.params.version;
+  var self = this;
   if (!version) {
     _getLatestVersion(this.store, req.params.snippet)
       .then((version) => {
@@ -193,10 +197,10 @@ Snippet.prototype.load = function(req, res, next) {
       }).catch(next);
   } else {
     this._loadSnippet(req.params.snippet, version)
-      .then((data, url) => {
+      .then((result) => {
         res.render(this.config.views.index, {
-          snippet: data,
-          snippetUrl: this.config.root + "/" + url
+          snippet: result.data,
+          snippetUrl: self.config.root + "/" + result.url
         });
       })
       .catch(next);
