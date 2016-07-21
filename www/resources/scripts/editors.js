@@ -13,7 +13,30 @@
           e: [fold.end.row, fold.end.column]
         }
       });
-      return JSON.stringify(folds);
+      if (folds.length == 0) {
+        return null;
+      }
+      return folds;
+    }
+  };
+
+  var _getEditorConfig = function(editor) {
+    var folds = _getCodeFolding(editor);
+    if (folds == null) {
+      return null;
+    }
+    return {
+      folds: folds
+    }
+  };
+
+  var _loadConfig = function(editor, config) {
+    if (config.folds) {
+      config.folds.forEach(function(fold) {
+        var range = new AceRange(fold.s[0], fold.s[1], fold.e[0], fold.e[
+          1]);
+        editor.session.addFold("...", range);
+      })
     }
   }
 
@@ -24,12 +47,12 @@
       }
       var result = Object.keys(_editors).reduce(function(reduction, curr) {
         reduction[curr] = _editors[curr].getValue();
-        reduction[curr + "Config"] = {
-          folds: _getCodeFolding(_editors[curr])
-        };
+        var config = _getEditorConfig(_editors[curr]);
+        if (config != null) {
+          reduction[curr + "Config"] = JSON.stringify(config);
+        }
         return reduction;
       }, {});
-
       return result;
     }
   }
@@ -45,6 +68,10 @@
     var data = $el.attr("data-content");
     if (data) {
       editor.setValue(data);
+    }
+    var config = $el.attr("data-config");
+    if (config) {
+      _loadConfig(editor, JSON.parse(config));
     }
     _editors[$el.attr("data-editor")] = editor;
   };

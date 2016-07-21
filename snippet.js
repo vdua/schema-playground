@@ -109,7 +109,7 @@ var _getLatestVersion = function(store, snippet) {
 
 var _resolvedFileMap = function(dir, fileMap, version) {
   version = version || 1
-  return Object.keys(fileMap).map((key) => {
+  var files = Object.keys(fileMap).map((key) => {
     var path
     if (key.match(/^!?\^/)) {
       path = dir + "/" + fileMap[key];
@@ -121,6 +121,15 @@ var _resolvedFileMap = function(dir, fileMap, version) {
       path: path
     }
   });
+  var configs = Object.keys(fileMap).map((key) => {
+    var fileName = fileMap
+    var d = utils.getFileNameAndExtension(fileMap[key]);
+    return {
+      name: key + "Config",
+      path: dir + "/" + version + "/" + d.name + "Config.json"
+    }
+  });
+  return files.concat(configs);
 }
 
 Snippet.prototype._loadSnippet = function(snippet, version) {
