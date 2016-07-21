@@ -30,8 +30,8 @@ Config.prototype = {
     }
   },
 
-  get resources() {
-    return this.config.resources
+  get static() {
+    return this.config.static;
   }
 }
 

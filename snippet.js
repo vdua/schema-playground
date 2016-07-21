@@ -69,11 +69,10 @@ var _saveFiles = function (fileMap, data, callback) {
   )
 }
 
-var _getSnippetDir = function (store, snippet, version) {
-  version = version || 1;
+var _getSnippetDir = function (store, snippet) {
   var store = store
   var id = parseInt(snippet, 36);
-  return store + "/" + id + "/" + version
+  return store + "/" + id;
 }
 
 var _getLatestVersion = function (store, snippet) {
@@ -94,26 +93,33 @@ var _getLatestVersion = function (store, snippet) {
   return new Promise(promiseHandler);
 }
 
-var _resolvedFileMap = function (dir, fileMap) {
+var _resolvedFileMap = function (dir, fileMap, version) {
+  version = version || 1
   return Object.keys(fileMap).map((key) => {
+    var path
+    if (key.match(/^!?\^/)) {
+      path = dir + "/" + fileMap[key];
+    } else {
+      path = dir + "/" + version + "/" + fileMap[key];
+    }
     return {
       name : key,
-      path : dir + "/" + fileMap[key]
+      path : path
     }
   });
 }
 
 Snippet.prototype._loadSnippet = function (snippet, version) {
-  var dir = _getSnippetDir(this.config.store, snippet, version);
+  var dir = _getSnippetDir(this.config.store, snippet);
   var self = this;
   return new Promise((resolve, reject) => {
-    fs.stat(dir, (err, stats) => {
+    fs.stat(dir + "/" + version, (err, stats) => {
       if (err) reject({
         msg : "Unable to locate the requested snippet",
         err : err,
         status : 404
       });
-      var map = _resolvedFileMap(dir, self.config.fileNames);
+      var map = _resolvedFileMap(dir, self.config.fileNames, version);
       _loadFiles(map).then((val) => {
           resolve(val);
         })
@@ -129,7 +135,7 @@ Snippet.prototype._createSnippet = function (snippet, data, callback) {
   var dir = _getSnippetDir(this.config.store, snippet);
   mkdirp.sync(dir);
   console.log("directory created" + dir);
-  return _saveFiles(_resolvedFileMap(dir, this.config.fileNames), data)
+  return _saveFiles(_resolvedFileMap(dir, this.config.fileNames, 1), data)
 }
 
 Snippet.prototype._updateSnippet = function (snippet, version, data) {
@@ -141,10 +147,10 @@ Snippet.prototype._updateSnippet = function (snippet, version, data) {
         return resolve(version)
       }
       version = latest + 1;
-      dir = _getSnippetDir(self.config.store, snippet, version);
+      dir = _getSnippetDir(self.config.store, snippet);
       mkdirp.sync(dir);
       console.log("directory created" + dir);
-      _saveFiles(_resolvedFileMap(dir, self.config.fileNames), data)
+      _saveFiles(_resolvedFileMap(dir, self.config.fileNames, version), data)
       .then(() => {
         resolve(version);
       })
@@ -217,7 +223,6 @@ Snippet.prototype.list = function (req, res, next) {
     res.render(this.config.views.list, {snippets : f})
   })
 }
-
 
 exports.snippet = function (config, cli) {
   return new Snippet(config, cli);

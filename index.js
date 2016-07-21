@@ -11,8 +11,9 @@ console.log(configPath)
 var root = config.root + "/"
 
 app.use(express.static('www'))
-if (config.resources) {
-  app.use(root, express.static(configPath + "/" + config.resources))
+if (config.static) {
+  console.log(config.static);
+  app.use(config.static.root, express.static(configPath + "/" + config.static.path))
 }
 app.use(bodyParser.urlencoded());
 app.set('views', configPath + "/" + config.views.path)
