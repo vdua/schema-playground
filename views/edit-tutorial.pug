@@ -1,24 +1,26 @@
-doctype html
+doctype html5
 head
   meta(charset="utf-8")
   title Edit Tutorial
   link(rel="stylesheet", type="text/css", href="/resources/third-party/bootstrap/css/bootstrap.css")
   link(rel="stylesheet", href="/resources/styles/styles.css", media="screen", title="no title")
 body
-  iframe#snippetPreview()
+  #snippetPreview
+    iframe(src= '/' + snippet)
+    .overlay
   .container
     .row
       .col-md-6
         h1 Available snippets
         ul
-        each snippet in availableSnippets
-          li(data-snippet= snippet)= snippet
+          each snip in availableSnippets
+            li(data-snippet= snip)= snip
       .col-md-6
         h1 Used Snippets
         ul
-        each snippet in order
-          li(data-snippet= snippet)= snippet
+          each snip in order
+            li(data-snippet= snip)= snip
   script(src="/resources/third-party/ace/ace.js", charset="utf-8")
   script(src="/resources/third-party/jquery/jquery.js", charset="utf-8")
   script(src="/resources/third-party/bootstrap/js/bootstrap.js", charset="utf-8")
-  script(src="/resources/third-party/ajv.bundle.js", charset="utf-8")
+  script(src="/resources/third-party/sortable/Sortable.js", charset="utf-8")
