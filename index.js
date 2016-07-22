@@ -28,7 +28,9 @@ app.get(root, (req, res) => {
 app.get(root + 'list', snippet.list.bind(snippet));
 
 app.post(root + "tutorial", tutorial.save.bind(tutorial));
-app.get(root + "tutorial/:tutname/edit", tutorial.edit.bind(tutorial));
+app.route(root + "tutorial/:tutname/edit")
+.get(tutorial.edit.bind(tutorial))
+.post(tutorial.save.bind(tutorial))
 app.get(root + "tutorial/:tutname", tutorial.load.bind(tutorial));
 
 app.route(root + ':snippet').get(snippet.load.bind(snippet)).post(snippet.save.bind(

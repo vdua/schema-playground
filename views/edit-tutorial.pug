@@ -6,21 +6,33 @@ head
   link(rel="stylesheet", href="/resources/styles/styles.css", media="screen", title="no title")
 body
   #snippetPreview
-    iframe(src= '/' + snippet)
+    iframe(src= '/' + snippet data-snippetname= snippet)
     .overlay
   .container
     .row
+      button.btn.btn-primary#new(type="button",  name="button"
+        data-url=""
+        data-tool="save", data-method="post" data-data="tutorial.getData()") Save
+    .row
       .col-md-6
         h1 Available snippets
-        ul
+        ul#available-snippets.snippets-list(data-sortable="snippets")
           each snip in availableSnippets
-            li(data-snippet= snip)= snip
+            li(data-id= snip)
+              i.handle.glyphicon.glyphicon-menu-hamburger
+              a(href= '/' + snippet + '/' + snip data-iframe-previewer) Snippet #{snip}
+              i.move.glyphicon(data-move)
       .col-md-6
         h1 Used Snippets
-        ul
+        ul#used-snippets.snippets-list(data-sortable="snippets")
           each snip in order
-            li(data-snippet= snip)= snip
+            li(data-id= snip)
+              i.handle.glyphicon.glyphicon-menu-hamburger
+              a(href= '/' + snippet + '/' + snip data-iframe-previewer) Snippet #{snip}
+              i.move.glyphicon(data-move)
   script(src="/resources/third-party/ace/ace.js", charset="utf-8")
   script(src="/resources/third-party/jquery/jquery.js", charset="utf-8")
   script(src="/resources/third-party/bootstrap/js/bootstrap.js", charset="utf-8")
   script(src="/resources/third-party/sortable/Sortable.js", charset="utf-8")
+  script(src="/resources/scripts/toolbar.js", charset="utf-8")
+  script(src="/resources/scripts/tutorial.js", charset="utf-8")
