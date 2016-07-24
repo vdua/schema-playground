@@ -198,12 +198,16 @@ Snippet.prototype._updateSnippet = function(snippet, version, data) {
 Snippet.prototype.load = function(req, res, next) {
   var version = req.params.version;
   var self = this;
+  var readOnly = !!req.query.readOnly
   if (!version) {
     _getLatestVersion(this.store, req.params.snippet)
       .then((version) => {
         var redirect = utils.join("/", this.config.root, req.params.snippet,
           version);
         redirect = utils.join(".", redirect, req.params.ext);
+        if (readOnly) {
+          redirect = redirect + "?readOnly=true";
+        }
         res.redirect(redirect);
       }).catch(next);
   } else {
@@ -217,7 +221,8 @@ Snippet.prototype.load = function(req, res, next) {
             res.render(this.config.views.index, {
               snippet: result.data,
               snippetName: req.params.snippet,
-              snippetUrl: self.config.root + "/" + result.url
+              snippetUrl: self.config.root + "/" + result.url,
+              readOnly: readOnly
             });
         }
       })

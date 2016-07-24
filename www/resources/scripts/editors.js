@@ -65,6 +65,9 @@
     editor.getSession().setMode("ace/mode/" + mode);
     editor.getSession().setTabSize(2);
     editor.getSession().setUseSoftTabs(true);
+    if ($el[0].hasAttribute("data-readOnly")) {
+      editor.setReadOnly(true);
+    }
     var data = $el.attr("data-content");
     if (data) {
       editor.setValue(data);

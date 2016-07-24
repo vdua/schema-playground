@@ -6,7 +6,7 @@ head
   link(rel="stylesheet", href="/resources/styles/styles.css", media="screen", title="no title")
 body
   #snippetPreview
-    iframe(src= '/' + snippet data-snippetname= snippet)
+    iframe(src= '/' + snippet + "?readOnly=true" data-snippetname= snippet)
     .overlay
   .container
     .row
