@@ -30,7 +30,7 @@ var _createTutorial = function(config, snippetName, tutName, order) {
   return new Promise(promiseHandler);
 }
 
-var _saveTutorialData = function (store, tutFile, snippetName, order) {
+var _saveTutorialData = function(store, tutFile, snippetName, order) {
   return new Promise((resolve, reject) => {
     var obj = {};
     if (typeof order === "string" && order !== "*") {
@@ -46,8 +46,8 @@ var _saveTutorialData = function (store, tutFile, snippetName, order) {
         });
       }
       utils.writeToFile(tutFile, JSON.stringify(obj))
-      .then(resolve)
-      .catch(reject)
+        .then(resolve)
+        .catch(reject)
     }).catch(reject)
   })
 }
@@ -58,21 +58,21 @@ var _updateTutorial = function(config, snippetName, tutName, order) {
   var obj = {};
   var promiseHandler = function(resolve, reject) {
     Promise.all([utils.fileExists(snippetDir), utils.readFile(tutFile)])
-    .then((result) => {
-      var tutData = JSON.parse(result[1]);
-      if (snippetName == tutData.snippet) {
-        _saveTutorialData(config.store, tutFile, snippetName, order)
-        .then(resolve)
-        .catch(reject)
-      } else {
-        reject({
-          err : "You don't have access to update the tutorial",
-          msg : "You don't have access to update the tutorial",
-          status : "403"
-        })
-      }
-    })
-    .catch(reject)
+      .then((result) => {
+        var tutData = JSON.parse(result[1]);
+        if (snippetName == tutData.snippet) {
+          _saveTutorialData(config.store, tutFile, snippetName, order)
+            .then(resolve)
+            .catch(reject)
+        } else {
+          reject({
+            err: "You don't have access to update the tutorial",
+            msg: "You don't have access to update the tutorial",
+            status: "403"
+          })
+        }
+      })
+      .catch(reject)
   };
   return new Promise(promiseHandler);
 }
@@ -90,10 +90,10 @@ Tutorial.prototype.save = function(req, res, next) {
       .catch(next);
   } else {
     _updateTutorial(this.config, req.body.snippet, tutName, req.body.order)
-    .then(() => {
-      res.redirect(self.config.root + "/tutorial/" + tutName + "/edit");
-    })
-    .catch(next)
+      .then(() => {
+        res.redirect(self.config.root + "/tutorial/" + tutName + "/edit");
+      })
+      .catch(next)
   }
 }
 
@@ -108,7 +108,6 @@ Tutorial.prototype.edit = function(req, res, next) {
         .then((version) => {
           _data.availableSnippets = _.difference(_.range(1, version +
             1), _data.order);
-          console.log(_data);
           res.render('edit-tutorial', _data);
         })
         .catch(next);

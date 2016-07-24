@@ -99,3 +99,9 @@ exports.readFile = function(file) {
     });
   })
 }
+
+exports.join = function(sep) {
+  return [].slice.call(arguments, 1).filter(function(e) {
+    return e != null
+  }).join(sep)
+}

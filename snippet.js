@@ -201,17 +201,25 @@ Snippet.prototype.load = function(req, res, next) {
   if (!version) {
     _getLatestVersion(this.store, req.params.snippet)
       .then((version) => {
-        res.redirect(this.config.root + "/" + req.params.snippet + "/" +
-          version)
+        var redirect = utils.join("/", this.config.root, req.params.snippet,
+          version);
+        redirect = utils.join(".", redirect, req.params.ext);
+        res.redirect(redirect);
       }).catch(next);
   } else {
     this._loadSnippet(req.params.snippet, version)
       .then((result) => {
-        res.render(this.config.views.index, {
-          snippet: result.data,
-          snippetName: req.params.snippet,
-          snippetUrl: self.config.root + "/" + result.url
-        });
+        switch (req.params.ext) {
+          case "json":
+            res.send(result.data);
+            break;
+          default:
+            res.render(this.config.views.index, {
+              snippet: result.data,
+              snippetName: req.params.snippet,
+              snippetUrl: self.config.root + "/" + result.url
+            });
+        }
       })
       .catch(next);
   }
