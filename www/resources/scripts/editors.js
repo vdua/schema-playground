@@ -54,35 +54,54 @@
         return reduction;
       }, {});
       return result;
+    },
+    createEditor: function($el, name) {
+      var mode = $el.attr("data-mode") || "json";
+      var theme = $el.attr("data-theme") || "monokai";
+      var editor = ace.edit($el[0]);
+      editor.setTheme("ace/theme/" + theme);
+      editor.getSession().setMode("ace/mode/" + mode);
+      editor.getSession().setTabSize(2);
+      editor.getSession().setUseSoftTabs(true);
+      editor.getSession().setUseWrapMode(true);
+      if ($el[0].hasAttribute("data-readOnly")) {
+        editor.setReadOnly(true);
+      }
+      var data = $el.attr("data-content");
+      if (data) {
+        editor.setValue(data);
+      }
+      var config = $el.attr("data-config");
+      if (config) {
+        _loadConfig(editor, JSON.parse(config));
+      }
+      _editors[name] = editor;
+      _createEditorMutation($el[0], editor)
+      return editor;
     }
   }
 
-  var createEditor = function($el) {
-    var mode = $el.attr("data-mode") || "json";
-    var theme = $el.attr("data-theme") || "monokai";
-    var editor = ace.edit($el[0]);
-    editor.setTheme("ace/theme/" + theme);
-    editor.getSession().setMode("ace/mode/" + mode);
-    editor.getSession().setTabSize(2);
-    editor.getSession().setUseSoftTabs(true);
-    if ($el[0].hasAttribute("data-readOnly")) {
-      editor.setReadOnly(true);
-    }
-    var data = $el.attr("data-content");
-    if (data) {
-      editor.setValue(data);
-    }
-    var config = $el.attr("data-config");
-    if (config) {
-      _loadConfig(editor, JSON.parse(config));
-    }
-    _editors[$el.attr("data-editor")] = editor;
-  };
-
-  $(function() {
-    $("[data-editor]").each(function() {
-      createEditor($(this));
+  var _createEditorMutation = function(target, editor) {
+    var editorMutation = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        console.log(m.type + " " + m.attributeName);
+        if (m.attributeName == "data-content") {
+          editor.setValue(target.getAttribute("data-content"));
+        }
+        if (m.attributeName == "data-config") {
+          try {
+            var val = target.getAttribute("data-content");
+            var config = JSON.parse(val)
+            _loadConfig(editor, config);
+          } catch (e) {
+            console.log(e)
+          }
+        }
+      });
     });
-  });
+    editorMutation.observe(target, {
+      attributes: true
+    });
+  };
 
 }())

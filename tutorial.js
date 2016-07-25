@@ -77,7 +77,6 @@ var _updateTutorial = function(config, snippetName, tutName, order) {
   return new Promise(promiseHandler);
 }
 
-
 Tutorial.prototype.save = function(req, res, next) {
   var tutName = req.params.tutname;
   var self = this;
@@ -122,7 +121,20 @@ Tutorial.prototype.edit = function(req, res, next) {
 };
 
 Tutorial.prototype.load = function(req, res, next) {
-  res.send("Hello World");
+  var tutName = req.params.tutname;
+  var self = this;
+  var tutFile = utils.getDir(this.config.tutStore, tutName);
+  if (tutName != null) {
+    utils.readFile(tutFile).then((data) => {
+      var _data = JSON.parse(data);
+      res.render("tutorial", {
+        tutorial: _data
+      });
+    }).catch({
+      msg: "cannot find what you are looking for",
+      status: 404
+    })
+  }
 }
 
 exports.tutorial = function(config, cli) {
