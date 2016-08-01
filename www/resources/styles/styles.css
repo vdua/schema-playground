@@ -22,15 +22,6 @@
   border : 0
 }
 
-#snippetPreview .overlay {
-  position : absolute;
-  top : 0;
-  bottom : 0;
-  right : 20px;
-  left : 0;
-  z-index : 100;
-}
-
 ul.snippets-list {
   list-style: none;
   padding : 10px;

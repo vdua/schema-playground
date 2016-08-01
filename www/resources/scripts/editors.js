@@ -1,6 +1,6 @@
 (function() {
   _editors = {};
-
+  _snippetCache = {};
   var AceRange = ace.require('ace/range').Range;
 
   var _getCodeFolding = function(editor) {
@@ -29,6 +29,23 @@
       folds: folds
     }
   };
+
+  var addSnippet = function (snippetFile, editor) {
+    if (!_snippetCache[snippetFile]) {
+      _snippetCache[snippetFile] = true;
+      ace.config.loadModule('ace/ext/language_tools', function () {
+        var snippetManager = ace.require("ace/snippets").snippetManager;
+        editor.setOption("enableSnippets", true)
+        editor.setOption("enableBasicAutocompletion", true)
+        $.ajax(snippetFile).then(function (data) {
+          _snippetCache[snippetFile] = data;
+          snippetManager.register(snippetManager.parseSnippetFile(data))
+        }).fail(function () {
+          console.error("unable to load snippt " + snippetFile);
+        })
+      });
+    }
+  }
 
   var _loadConfig = function(editor, config) {
     if (config.folds) {
@@ -67,15 +84,22 @@
       if ($el[0].hasAttribute("data-readOnly")) {
         editor.setReadOnly(true);
       }
+      var snippet = $el.attr("data-editor-snippets");
+      if (snippet) {
+        addSnippet(snippet, editor)
+      }
       var data = $el.attr("data-content");
       if (data) {
         editor.setValue(data);
+        editor.gotoLine(1);
       }
       var config = $el.attr("data-config");
       if (config) {
         _loadConfig(editor, JSON.parse(config));
       }
-      _editors[name] = editor;
+      if (name) {
+        _editors[name] = editor;
+      }
       _createEditorMutation($el[0], editor)
       return editor;
     }
@@ -84,13 +108,13 @@
   var _createEditorMutation = function(target, editor) {
     var editorMutation = new MutationObserver(function(mutations) {
       mutations.forEach(function(m) {
-        console.log(m.type + " " + m.attributeName);
         if (m.attributeName == "data-content") {
           editor.setValue(target.getAttribute("data-content"));
+          editor.gotoLine(1);
         }
         if (m.attributeName == "data-config") {
           try {
-            var val = target.getAttribute("data-content");
+            var val = target.getAttribute("data-config");
             var config = JSON.parse(val)
             _loadConfig(editor, config);
           } catch (e) {

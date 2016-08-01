@@ -30,7 +30,7 @@
       _sortables.push(sort);
       $(this).attr("data-sortable-id", _sortables.length - 1);
     }).on("click.preview", "[data-iframe-previewer]", function(e) {
-      $("iframe").attr("src", $(this).attr("href"));
+      $("iframe").attr("src", $(this).attr("href") + "?readOnly=true");
       e.preventDefault();
     }).on("click.move", "[data-move]", function(e) {
       var $el = $(this);

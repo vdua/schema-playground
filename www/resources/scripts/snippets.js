@@ -17,16 +17,18 @@
 
   var _createSnippetElement = function($el) {
     var target = $el[0];
-    var snippetName = $el.attr("data-snippet-el") || $el.attr("data-editor");
+    var snippetName = $el.attr("data-snippet-el");
     var snippet = {
       $el: $el
     };
     if (target.hasAttribute("data-editor")) {
       snippet.type = "editor";
     }
-    _snippets[snippetName] = snippet;
+    if (snippetName) {
+      _snippets[snippetName] = snippet;
+    }
     if (snippet.type == "editor") {
-      editors.createEditor($el);
+      editors.createEditor($el, snippetName);
     } else {
       var content = $el.attr("data-content");
       if (content) {
