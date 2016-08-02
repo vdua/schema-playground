@@ -4,3 +4,6 @@
   resize: none;
   padding: 10px;
 }
+.ace_editor.editor {
+  font-size : 14px;
+}

@@ -40,6 +40,19 @@
         this.current--;
         this.load();
       },
+      goto: function (page) {
+        if (isNaN(page)) {
+          page = 0;
+        }
+        if (page >= this.order.length) {
+          page = this.order.length - 1;
+        }
+        if (page < 0) {
+          page = 0;
+        }
+        this.current = page;
+        this.load();
+      },
       nextBtns: $("[data-tutorial-next]"),
       prevBtns: $("[data-tutorial-prev]")
     };
@@ -50,8 +63,8 @@
     tutorial.prevBtns.on("click.tutorial", function(e) {
       tutorial.prev();
     });
-
-    tutorial.next();
+    var page = +(utils.getQueryValue("p"))
+    tutorial.goto(page);
   }
 
   $(function() {
