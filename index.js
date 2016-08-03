@@ -39,13 +39,12 @@ app.route(root + "tutorial/:tutname/edit")
   .get(tutorial.edit.bind(tutorial))
   .post(tutorial.save.bind(tutorial))
 app.get(root + "tutorial/:tutname", tutorial.load.bind(tutorial));
-
+app.route(root + ':snippet/zip').get(snippet.export.bind(snippet))
 app.route(root + ':snippet.:ext?').get(snippet.load.bind(snippet)).post(
   snippet.save.bind(
     snippet))
 app.route(root + ':snippet/:version.:ext?').get(snippet.load.bind(snippet)).post(
   snippet.save.bind(snippet))
-
 app.use(function(err, req, res, next) {
   console.error(err);
   if (err.err) {

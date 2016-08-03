@@ -3,6 +3,8 @@ const mkdirp = require('mkdirp');
 const _ = require('underscore')
 const marked = require('marked')
 const utils = require('./utils.js')
+const AdmZip = require('adm-zip');
+const path = require('path');
 var Snippet = function(config, cli) {
   this.config = config;
   this.cli = cli;
@@ -272,6 +274,21 @@ Snippet.prototype.list = function(req, res, next) {
       snippets: f
     })
   })
+}
+
+
+Snippet.prototype.export = function (req, res, next) {
+  var self = this;
+  var zip = new AdmZip();
+  var snippetName = req.params.snippet;
+  var dir = utils.getDir(this.store, snippetName);
+  utils.addDirToZip(path.resolve(dir), path.resolve(dir, ".."), zip)
+    .then(() => {
+      zip.toBuffer(function (buffer) {
+        res.attachment(snippetName + ".zip");
+        res.send(buffer);
+      });
+    })
 }
 
 exports.snippet = function(config, cli) {

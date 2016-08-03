@@ -1,5 +1,5 @@
 const fs = require('fs');
-
+const path = require('path')
 exports.toSentenceCase = function(str) {
   var lstr = str.toLowerCase();
   return lstr[0].toUpperCase() + lstr.substring(1);
@@ -105,3 +105,28 @@ exports.join = function(sep) {
     return e != null
   }).join(sep)
 }
+
+var addDirToZip = function (dir, rootDir, zip) {
+  var entryName = dir.replace(rootDir+"\\", "");
+  zip.addFile(entryName + "/", new Buffer(0));
+  var promiseHandler = function (resolve, reject) {
+    fs.readdir(dir, (err, files) => {
+      if (err) reject(err);
+      var promises = []
+      files.forEach((file) => {
+        var filePath = dir + "/" + file
+        if (fs.statSync(filePath).isDirectory()) {
+          promises.push(addDirToZip(filePath, rootDir, zip));
+        } else {
+          entryName = filePath.replace(rootDir+"\\", "");
+          var data = fs.readFileSync(filePath);
+          zip.addFile(entryName, data, "", 0644 << 16);
+        }
+      });
+      Promise.all(promises).then(resolve).catch(reject);
+    })
+  }
+  return new Promise(promiseHandler);
+}
+
+exports.addDirToZip = addDirToZip;

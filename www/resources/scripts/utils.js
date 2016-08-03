@@ -11,7 +11,7 @@
         } else if (typeof exceptions == "string") {
           return prop === exceptions
         }
-        return true;
+        return false;
       };
 
       Object.keys(src).forEach(function (p) {
