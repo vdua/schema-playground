@@ -129,4 +129,29 @@ var addDirToZip = function (dir, rootDir, zip) {
   return new Promise(promiseHandler);
 }
 
+exports.resolvedPromise = function () {
+  return new Promise((resolve, reject) => {
+    resolve();
+  });
+}
+
+exports.rejectedPromise = function () {
+  return new Promise((resolve, reject) => {
+    reject();
+  });
+}
+
+exports.fileExists = function (file) {
+  return new Promise((resolve, reject) => {
+    fs.stat(file, (err, stats) => {
+      if (err) reject(err);
+      resolve(stats);
+    })
+  })
+}
+
+exports.INTEGER_COMPARISON = function(a, b) {
+  return a - b;
+}
+
 exports.addDirToZip = addDirToZip;
