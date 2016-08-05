@@ -6,9 +6,13 @@
   }
 
   var _load = function(snippet, version) {
-    _getSnippet(snippet, version).then(
+    return _getSnippet(snippet, version).then(
       function(data) {
         Snippets.setSnippet(data);
+        setTimeout(
+          function () {
+            $(document).trigger("snippetload")
+          }, 100)
       });
   }
 
