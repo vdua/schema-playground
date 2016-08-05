@@ -2,35 +2,47 @@ const snippet = require("../lib/snippet.js");
 const path = require("path");
 const fs = require('fs');
 const helpers = require('./helpers/helpers.js')
-describe("Snippet Suite", function () {
-  var oneFileSnippet, multiFileSnippet, markdownFileSnippet
+const mkdirp = require('mkdirp');
+const rimraf = require('rimraf');
+describe("Snippet Suite", function() {
+  var oneFileSnippet, multiFileSnippet, markdownFileSnippet,
+    writableSnippet;
 
-  beforeEach(function () {
+  beforeEach(function() {
     oneFileSnippet = snippet.newSnippet({
       store: path.resolve("spec/collateral/data1"),
-      fileMap : {
-        "form" : "form.json"
+      fileMap: {
+        "form": "form.json"
       }
     });
     multiFileSnippet = snippet.newSnippet({
       store: path.resolve("spec/collateral/data2"),
-      fileMap : {
-        "form" : "form.json",
-        "test" : "test.json"
+      fileMap: {
+        "form": "form.json",
+        "test": "test.json"
       }
     });
     markdownFileSnippet = snippet.newSnippet({
       store: path.resolve("spec/collateral/data3"),
-      fileMap : {
-        "form" : "form.json",
-        "test" : "test.json",
-        "description" : "description.md"
+      fileMap: {
+        "form": "form.json",
+        "test": "test.json",
+        "description": "description.md"
       }
     });
+    writableSnippet = snippet.newSnippet({
+      store: path.resolve("tmp"),
+      fileMap: {
+        "form": "form.json",
+        "test": "test.json",
+        "description": "description.md"
+      }
+    })
     jasmine.addMatchers(helpers.customMatchers);
   })
-  it("test 1", function () {
-    expect(oneFileSnippet.store).toEqual(path.resolve("spec/collateral/data1"));
+  it("test 1", function() {
+    expect(oneFileSnippet.store).toEqual(path.resolve(
+      "spec/collateral/data1"));
     expect(oneFileSnippet.fileMap.form).toEqual("form.json")
   });
 
@@ -77,12 +89,13 @@ describe("Snippet Suite", function () {
     var fileMap = oneFileSnippet._getFileMap(snippetName)
     expect(fileMap.length).toEqual(2);
     expect(fileMap[0]).toEqual({
-      name : "form",
-      path : path.resolve("spec/collateral/data1/150/1/form.json")
+      name: "form",
+      path: path.resolve("spec/collateral/data1/150/1/form.json")
     });
     expect(fileMap[1]).toEqual({
-      name : "formConfig",
-      path : path.resolve("spec/collateral/data1/150/1/formConfig.json")
+      name: "formConfig",
+      path: path.resolve(
+        "spec/collateral/data1/150/1/formConfig.json")
     })
   });
 
@@ -93,12 +106,13 @@ describe("Snippet Suite", function () {
     var fileMap = oneFileSnippet._getFileMap(snippetName, 2)
     expect(fileMap.length).toEqual(2);
     expect(fileMap[0]).toEqual({
-      name : "form",
-      path : path.resolve("spec/collateral/data1/150/2/form.json")
+      name: "form",
+      path: path.resolve("spec/collateral/data1/150/2/form.json")
     });
     expect(fileMap[1]).toEqual({
-      name : "formConfig",
-      path : path.resolve("spec/collateral/data1/150/2/formConfig.json")
+      name: "formConfig",
+      path: path.resolve(
+        "spec/collateral/data1/150/2/formConfig.json")
     })
   });
 
@@ -109,12 +123,13 @@ describe("Snippet Suite", function () {
     var fileMap = oneFileSnippet._getFileMap(snippetName, 2)
     expect(fileMap.length).toEqual(2);
     expect(fileMap[0]).toEqual({
-      name : "form",
-      path : path.resolve("spec/collateral/data1/151/2/form.json")
+      name: "form",
+      path: path.resolve("spec/collateral/data1/151/2/form.json")
     });
     expect(fileMap[1]).toEqual({
-      name : "formConfig",
-      path : path.resolve("spec/collateral/data1/151/2/formConfig.json")
+      name: "formConfig",
+      path: path.resolve(
+        "spec/collateral/data1/151/2/formConfig.json")
     })
   });
 
@@ -125,31 +140,34 @@ describe("Snippet Suite", function () {
     var fileMap = multiFileSnippet._getFileMap(snippetName, 1)
     expect(fileMap.length).toEqual(4);
     expect(fileMap[0]).toEqual({
-      name : "form",
-      path : path.resolve("spec/collateral/data2/151/1/form.json")
+      name: "form",
+      path: path.resolve("spec/collateral/data2/151/1/form.json")
     });
     expect(fileMap[1]).toEqual({
-      name : "test",
-      path : path.resolve("spec/collateral/data2/151/1/test.json")
+      name: "test",
+      path: path.resolve("spec/collateral/data2/151/1/test.json")
     });
     expect(fileMap[2]).toEqual({
-      name : "formConfig",
-      path : path.resolve("spec/collateral/data2/151/1/formConfig.json")
+      name: "formConfig",
+      path: path.resolve(
+        "spec/collateral/data2/151/1/formConfig.json")
     })
     expect(fileMap[3]).toEqual({
-      name : "testConfig",
-      path : path.resolve("spec/collateral/data2/151/1/testConfig.json")
+      name: "testConfig",
+      path: path.resolve(
+        "spec/collateral/data2/151/1/testConfig.json")
     })
   });
 
   //single file spec
-  it("_loadData test 1", function (done) {
+  it("_loadData test 1", function(done) {
     var directory = 150;
     var snippetName = directory.toString(36)
     var fileMap = oneFileSnippet._getFileMap(snippetName, 1);
     oneFileSnippet._loadData(fileMap).then((values) => {
       expect(values.length).toEqual(2);
-      var data = fs.readFileSync(path.resolve("spec/collateral/data1/150/1/form.json"), 'utf-8')
+      var data = fs.readFileSync(path.resolve(
+        "spec/collateral/data1/150/1/form.json"), 'utf-8')
       expect(values[0]).toEqual(data);
       expect(values[1]).toBeUndefined()
       done();
@@ -159,7 +177,7 @@ describe("Snippet Suite", function () {
   })
 
   //single file spec no file exists
-  it("_loadData test 2", function (done) {
+  it("_loadData test 2", function(done) {
     var directory = 150;
     var snippetName = directory.toString(36)
     var fileMap = oneFileSnippet._getFileMap(snippetName, 4);
@@ -174,13 +192,14 @@ describe("Snippet Suite", function () {
   })
 
   //single file spec extra file
-  it("_loadData test 3", function (done) {
+  it("_loadData test 3", function(done) {
     var directory = 151;
     var snippetName = directory.toString(36)
     var fileMap = oneFileSnippet._getFileMap(snippetName);
     oneFileSnippet._loadData(fileMap).then((values) => {
       expect(values.length).toEqual(2);
-      expect(values[0]).toEqual(fs.readFileSync(path.resolve("spec/collateral/data1/151/1/form.json")).toString())
+      expect(values[0]).toEqual(fs.readFileSync(path.resolve(
+        "spec/collateral/data1/151/1/form.json")).toString())
       expect(values[1]).toBeUndefined();
       done();
     }).catch((err) => {
@@ -189,14 +208,16 @@ describe("Snippet Suite", function () {
   })
 
   //single file spec with Config
-  it("_loadData test 4", function (done) {
+  it("_loadData test 4", function(done) {
     var directory = 150;
     var snippetName = directory.toString(36)
     var fileMap = oneFileSnippet._getFileMap(snippetName, 3);
     oneFileSnippet._loadData(fileMap).then((values) => {
       expect(values.length).toEqual(2);
-      expect(values[0]).toEqual(fs.readFileSync(path.resolve("spec/collateral/data1/150/3/form.json")).toString())
-      expect(values[1]).toEqual(fs.readFileSync(path.resolve("spec/collateral/data1/150/3/formConfig.json")).toString())
+      expect(values[0]).toEqual(fs.readFileSync(path.resolve(
+        "spec/collateral/data1/150/3/form.json")).toString())
+      expect(values[1]).toEqual(fs.readFileSync(path.resolve(
+        "spec/collateral/data1/150/3/formConfig.json")).toString())
       done();
     }).catch((err) => {
       console.error(err);
@@ -204,14 +225,16 @@ describe("Snippet Suite", function () {
   })
 
   //multiple file spec
-  it("_loadData test 4", function (done) {
+  it("_loadData test 4", function(done) {
     var directory = 151;
     var snippetName = directory.toString(36)
     var fileMap = multiFileSnippet._getFileMap(snippetName);
     multiFileSnippet._loadData(fileMap).then((values) => {
       expect(values.length).toEqual(4);
-      expect(values[0]).toEqual(fs.readFileSync(path.resolve("spec/collateral/data2/151/1/form.json")).toString())
-      expect(values[1]).toEqual(fs.readFileSync(path.resolve("spec/collateral/data2/151/1/test.json")).toString())
+      expect(values[0]).toEqual(fs.readFileSync(path.resolve(
+        "spec/collateral/data2/151/1/form.json")).toString())
+      expect(values[1]).toEqual(fs.readFileSync(path.resolve(
+        "spec/collateral/data2/151/1/test.json")).toString())
       expect(values[2]).toBeUndefined();
       expect(values[3]).toBeUndefined();
       done()
@@ -221,13 +244,14 @@ describe("Snippet Suite", function () {
   })
 
   //multiple file spec missing file
-  it("_loadData test 5", function (done) {
+  it("_loadData test 5", function(done) {
     var directory = 151;
     var snippetName = directory.toString(36)
     var fileMap = multiFileSnippet._getFileMap(snippetName, 2);
     multiFileSnippet._loadData(fileMap).then((values) => {
       expect(values.length).toEqual(4);
-      expect(values[0]).toEqual(fs.readFileSync(path.resolve("spec/collateral/data2/151/2/form.json")).toString())
+      expect(values[0]).toEqual(fs.readFileSync(path.resolve(
+        "spec/collateral/data2/151/2/form.json")).toString())
       expect(values[1]).toBeUndefined();
       expect(values[2]).toBeUndefined();
       expect(values[3]).toBeUndefined();
@@ -238,15 +262,18 @@ describe("Snippet Suite", function () {
   })
 
   //markdown file spec
-  it("_loadData test 6", function (done) {
+  it("_loadData test 6", function(done) {
     var directory = 151;
     var snippetName = directory.toString(36)
     var fileMap = markdownFileSnippet._getFileMap(snippetName, 1);
     markdownFileSnippet._loadData(fileMap).then((values) => {
       expect(values.length).toEqual(6);
-      expect(values[0]).toEqual(fs.readFileSync(path.resolve("spec/collateral/data3/151/1/form.json")).toString())
-      expect(values[1]).toEqual(fs.readFileSync(path.resolve("spec/collateral/data3/151/1/test.json")).toString())
-      expect(values[2]).toEqual(fs.readFileSync(path.resolve("spec/collateral/data3/151/1/description.md")).toString())
+      expect(values[0]).toEqual(fs.readFileSync(path.resolve(
+        "spec/collateral/data3/151/1/form.json")).toString())
+      expect(values[1]).toEqual(fs.readFileSync(path.resolve(
+        "spec/collateral/data3/151/1/test.json")).toString())
+      expect(values[2]).toEqual(fs.readFileSync(path.resolve(
+        "spec/collateral/data3/151/1/description.md")).toString())
       expect(values[3]).toBeUndefined();
       expect(values[4]).toBeUndefined();
       expect(values[5]).toBeUndefined();
@@ -257,12 +284,13 @@ describe("Snippet Suite", function () {
   });
 
   //single file spec
-  it("loadSnippet test 1", function (done) {
+  it("loadSnippet test 1", function(done) {
     var directory = 150;
     var snippetName = directory.toString(36)
     oneFileSnippet.loadSnippet(snippetName).then((result) => {
       expect(Object.keys(result).length).toEqual(2);
-      expect(result.data.form).toEqual(fs.readFileSync(path.resolve("spec/collateral/data1/150/1/form.json"), 'utf-8'));
+      expect(result.data.form).toEqual(fs.readFileSync(path.resolve(
+        "spec/collateral/data1/150/1/form.json"), 'utf-8'));
       expect(result.data.formConfig).toBeUndefined();
       expect(Object.keys(result.data).length).toEqual(2);
       done();
@@ -272,23 +300,25 @@ describe("Snippet Suite", function () {
   })
 
   //single file spec no file exists
-  it("loadSnippet test 2", function (done) {
+  it("loadSnippet test 2", function(done) {
     var directory = 150;
     var snippetName = directory.toString(36)
-    oneFileSnippet.loadSnippet(snippetName, 4).then((result) => {
-    }).catch((err) => {
-      expect(err.msg).toEqual("Unable to locate the requested snippet");
-      done();
-    })
+    oneFileSnippet.loadSnippet(snippetName, 4).then((result) => {}).catch(
+      (err) => {
+        expect(err.msg).toEqual(
+          "Unable to locate the requested snippet");
+        done();
+      })
   })
 
   //single file spec extra file
-  it("loadSnippet test 3", function (done) {
+  it("loadSnippet test 3", function(done) {
     var directory = 151;
     var snippetName = directory.toString(36)
     oneFileSnippet.loadSnippet(snippetName).then((result) => {
       expect(Object.keys(result).length).toEqual(2);
-      expect(result.data.form).toEqual(fs.readFileSync(path.resolve("spec/collateral/data1/151/1/form.json"), "utf-8"));
+      expect(result.data.form).toEqual(fs.readFileSync(path.resolve(
+        "spec/collateral/data1/151/1/form.json"), "utf-8"));
       expect(result.data.formConfig).toBeUndefined();
       expect(Object.keys(result.data).length).toEqual(2);
       done();
@@ -298,13 +328,16 @@ describe("Snippet Suite", function () {
   })
 
   //single file spec with Config
-  it("loadSnippet test 4", function (done) {
+  it("loadSnippet test 4", function(done) {
     var directory = 150;
     var snippetName = directory.toString(36)
     oneFileSnippet.loadSnippet(snippetName, 3).then((result) => {
       expect(Object.keys(result).length).toEqual(2);
-      expect(result.data.form).toEqual(fs.readFileSync(path.resolve("spec/collateral/data1/150/3/form.json"), "utf-8"));
-      expect(result.data.formConfig).toEqual(fs.readFileSync(path.resolve("spec/collateral/data1/150/3/formConfig.json"), "utf-8"))
+      expect(result.data.form).toEqual(fs.readFileSync(path.resolve(
+        "spec/collateral/data1/150/3/form.json"), "utf-8"));
+      expect(result.data.formConfig).toEqual(fs.readFileSync(path.resolve(
+          "spec/collateral/data1/150/3/formConfig.json"),
+        "utf-8"))
       expect(Object.keys(result.data).length).toEqual(2);
       done();
     }).catch((err) => {
@@ -313,13 +346,18 @@ describe("Snippet Suite", function () {
   })
 
   //multiple file spec
-  it("loadSnippet test 5", function (done) {
+  it("loadSnippet test 5", function(done) {
     var directory = 151;
     var snippetName = directory.toString(36)
     multiFileSnippet.loadSnippet(snippetName).then((result) => {
-      var filePath = [multiFileSnippet.store, directory, 1].join("/")
-      expect(result.data.form).equalsFileContents([filePath, "form.json"].join("/"))
-      expect(result.data.test).equalsFileContents([filePath, "test.json"].join("/"))
+      var filePath = [multiFileSnippet.store, directory, 1].join(
+        "/")
+      expect(result.data.form).equalsFileContents([filePath,
+        "form.json"
+      ].join("/"))
+      expect(result.data.test).equalsFileContents([filePath,
+        "test.json"
+      ].join("/"))
       expect(result.data.formConfig).toBeUndefined();
       expect(result.data.testConfig).toBeUndefined();
       expect(result.data).toHaveKeys(4)
@@ -330,14 +368,16 @@ describe("Snippet Suite", function () {
   })
 
   //multiple file spec missing file
-  it("loadSnippet test 6", function (done) {
+  it("loadSnippet test 6", function(done) {
     var directory = 151;
     var snippetName = directory.toString(36)
     var snippet = multiFileSnippet;
     var version = 2
     snippet.loadSnippet(snippetName, version).then((result) => {
       var filePath = [snippet.store, directory, version].join("/")
-      expect(result.data.form).equalsFileContents([filePath, "form.json"].join("/"))
+      expect(result.data.form).equalsFileContents([filePath,
+        "form.json"
+      ].join("/"))
       expect(result.data.formConfig).toBeUndefined();
       expect(result.data.testConfig).toBeUndefined()
       expect(result.data.test).toBeUndefined()
@@ -349,25 +389,186 @@ describe("Snippet Suite", function () {
   })
 
   //markdown file spec
-  it("loadSnippet test 7", function (done) {
+  it("loadSnippet test 7", function(done) {
     var directory = 151;
     var snippetName = directory.toString(36)
     markdownFileSnippet.loadSnippet(snippetName).then((result) => {
       expect(result.data).toHaveKeys(7);
-      var filePath = [markdownFileSnippet.store, directory, 1].join("/")
-      expect(result.data.form).equalsFileContents([filePath, "form.json"].join("/"))
-      expect(result.data.test).equalsFileContents([filePath, "test.json"].join("/"))
-      expect(result.data.description).equalsFileContents([filePath, "description.md"].join("/"))
+      var filePath = [markdownFileSnippet.store, directory, 1].join(
+        "/")
+      expect(result.data.form).equalsFileContents([filePath,
+        "form.json"
+      ].join("/"))
+      expect(result.data.test).equalsFileContents([filePath,
+        "test.json"
+      ].join("/"))
+      expect(result.data.description).equalsFileContents([filePath,
+        "description.md"
+      ].join("/"))
       expect(result.data.formConfig).toBeUndefined()
       expect(result.data.testConfig).toBeUndefined()
       expect(result.data.descriptionConfig).toBeUndefined()
-      expect(result.data.htmlDescription).equalsMarkedHTML([filePath, "description.md"].join("/"))
+      expect(result.data.htmlDescription).equalsMarkedHTML([
+        filePath, "description.md"
+      ].join("/"))
       done();
     }).catch((err) => {
       console.error(err);
     })
   });
 
+  //updating non existent snippet
+  it("_updateSnippet test 1", function(done) {
+    var directory = 147;
+    var snippetName = directory.toString(36);
+    writableSnippet._updateSnippet(snippetName, {
+      form: "form"
+    }).then(() => {
+      console.log("error case");
+    }).catch((e) => {
+      expect(e.msg).toEqual(
+        `unable to find the latest version of ${snippetName}`)
+      done();
+    })
+  });
 
+  //updating to a latest version
+  it("_updateSnippet test 2", function(done) {
+    var directory = 147;
+    var snippetName = directory.toString(36);
+    mkdirp.sync(`tmp/${directory}`);
+    writableSnippet._updateSnippet(snippetName, {
+      form: "form"
+    }).then((version) => {
+      expect(version).toEqual(1);
+      expect(`tmp/${directory}/1/form.json`).fileExists();
+      rimraf.sync(`tmp/${directory}`);
+      done();
+    }).catch((e) => {
+      console.error(e);
+    })
+  })
 
+  //checking extra files are not created
+  it("_updateSnippet test 3", function(done) {
+    var directory = 147;
+    var snippetName = directory.toString(36);
+    mkdirp.sync(`tmp/${directory}`);
+    writableSnippet._updateSnippet(snippetName, {
+      form: "form"
+    }, 1).then(() => {
+      expect(`tmp/${directory}/1/test.json`).not.fileExists();
+      rimraf.sync(`tmp/${directory}`);
+      done();
+    }).catch((e) => {
+      console.error(e);
+    })
+  })
+
+  //checking data on update
+  it("_updateSnippet test 4", function(done) {
+    var directory = 147;
+    var snippetName = directory.toString(36);
+    mkdirp.sync(`tmp/${directory}`);
+    writableSnippet._updateSnippet(snippetName, {
+      form: "form"
+    }).then(() => {
+      expect("form").equalsFileContents(
+        `tmp/${directory}/1/form.json`)
+      rimraf.sync(`tmp/${directory}`);
+      done();
+    }).catch((e) => {
+      console.error(e);
+    })
+  })
+
+  //passing more snippet data creates files
+  it("_updateSnippet test 5", function(done) {
+    var directory = 147;
+    var snippetName = directory.toString(36);
+    mkdirp.sync(`tmp/${directory}`);
+    writableSnippet._updateSnippet(snippetName, {
+      form: "form",
+      test: "test",
+      description: "description",
+      extra: "extra"
+    }).then(() => {
+      expect("test").equalsFileContents(
+        `tmp/${directory}/1/test.json`)
+      expect(`tmp/${directory}/1/`).fileCount(3)
+      rimraf.sync(`tmp/${directory}`);
+      done();
+    }).catch((e) => {
+      console.error(e);
+    })
+  })
+
+  //updating an existing version
+  it("_updateSnippet test 5", function(done) {
+    var directory = 147;
+    var snippetName = directory.toString(36);
+    mkdirp.sync(`tmp/${directory}`);
+    writableSnippet._updateSnippet(snippetName, {
+      form: "form",
+      test: "test",
+      description: "description",
+      extra: "extra"
+    }).then(() => {
+      writableSnippet._updateSnippet(snippetName, {
+        form: "form"
+      }).then((version) => {
+        expect(version).toEqual(2);
+        expect(`tmp/${directory}/2/form.json`).fileExists();
+        expect(`tmp/${directory}/2`).fileCount(1);
+        expect(`tmp/${directory}/4`).not.fileExists();
+        rimraf.sync(`tmp/${directory}`);
+        done();
+      })
+    }).catch((e) => {
+      console.error(e);
+    })
+  });
+
+  it("saveSnippet test 1", function(done) {
+    var directory = 147;
+    var snippetName = directory.toString(36);
+    writableSnippet.saveSnippet(snippetName, {
+      form: "form"
+    }).then((version) => {
+      expect(version).toEqual(1);
+      done();
+    }).catch((e) => {})
+  });
+
+  it("saveSnippet test 2", function(done) {
+    var directory = 147;
+    var snippetName = directory.toString(36);
+    writableSnippet.saveSnippet(snippetName, {
+      form: "form"
+    }).then((version) => {
+      expect(version).toEqual(2);
+      rimraf.sync(`tmp/${directory}`);
+      done();
+    }).catch((e) => {})
+  });
+
+  it("listSnippet test 1", function(done) {
+    oneFileSnippet.listSnippets().then(
+      (snippets) => {
+        expect(snippets.length).toEqual(3)
+        done();
+      }
+    )
+  });
+
+  it("listSnippet test 1", function(done) {
+    oneFileSnippet.listSnippets().then(
+      (snippets) => {
+        expect(snippets).toEqual([147, 150, 151].map((x) => {
+          return x.toString(36)
+        }));
+        done();
+      }
+    )
+  })
 })
