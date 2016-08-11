@@ -1,0 +1,31 @@
+#toolbar {
+  margin-bottom : 20px;
+}
+#toolbar .btn {
+  background: transparent;
+  border: transparent;
+}
+
+#toolbar .btn:hover {
+  background: transparent;
+  border: transparent;
+  color: #2e6da4;
+}
+
+.editor {
+  height: 400px;
+}
+
+.slide {
+  border: solid 1px #eeefff;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 7px 6px 23px -4px #4B4A70;
+  height: 500px;
+}
+
+.edit {
+  position: absolute;
+  right: 16.67;
+  cursor: pointer;
+}

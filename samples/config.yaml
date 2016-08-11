@@ -1,0 +1,13 @@
+port : 8080
+templatePath: views
+resources: www
+resourcesRoot: /samples
+presenters :
+  mdppt:
+    store: data/ppt
+    templates:
+      index: ppt/index
+      tutorial: ppt/tutorial
+      list: list
+    data:
+      slide: slide.md

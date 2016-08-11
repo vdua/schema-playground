@@ -1,7 +1,0 @@
-port : 8080
-data : data
-fileNames :
-  schema : schema.json
-  data : data.json
-  config : config.json
-  form : form.json

@@ -1,4 +1,4 @@
-const snippet = require("../lib/snippet.js");
+const snippet = require("../lib/modules/snippet.js");
 const path = require("path");
 const fs = require('fs');
 const helpers = require('./helpers/helpers.js')
@@ -11,20 +11,20 @@ describe("Snippet Suite", function() {
   beforeEach(function() {
     oneFileSnippet = snippet.newSnippet({
       store: path.resolve("spec/collateral/data1"),
-      fileMap: {
+      data: {
         "form": "form.json"
       }
     });
     multiFileSnippet = snippet.newSnippet({
       store: path.resolve("spec/collateral/data2"),
-      fileMap: {
+      data: {
         "form": "form.json",
         "test": "test.json"
       }
     });
     markdownFileSnippet = snippet.newSnippet({
       store: path.resolve("spec/collateral/data3"),
-      fileMap: {
+      data: {
         "form": "form.json",
         "test": "test.json",
         "description": "description.md"
@@ -32,7 +32,7 @@ describe("Snippet Suite", function() {
     });
     writableSnippet = snippet.newSnippet({
       store: path.resolve("tmp"),
-      fileMap: {
+      data: {
         "form": "form.json",
         "test": "test.json",
         "description": "description.md"
@@ -43,7 +43,7 @@ describe("Snippet Suite", function() {
   it("test 1", function() {
     expect(oneFileSnippet.store).toEqual(path.resolve(
       "spec/collateral/data1"));
-    expect(oneFileSnippet.fileMap.form).toEqual("form.json")
+    expect(oneFileSnippet.data.form).toEqual("form.json")
   });
 
   it("queryLatestVersion test 1", function(done) {

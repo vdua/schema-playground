@@ -55,5 +55,14 @@
     $("[data-snippet-el]").each(function() {
       _createSnippetElement($(this));
     });
+    var str = $("[data-snippet]").attr("data-snippet")
+    if (str) {
+      try {
+        var json = JSON.parse(str);
+        Snippets.setSnippet(json);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   });
 }())

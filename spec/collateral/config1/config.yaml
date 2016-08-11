@@ -1,0 +1,12 @@
+port : 8082
+templatePath : views
+presenters:
+  p1:
+    store: data
+    templates:
+      index: index
+      tutorial: tutorial
+    data:
+      x: x
+      y: y
+      z: z
