@@ -30,17 +30,18 @@
     }
   };
 
-  var addSnippet = function (snippetFile, editor) {
+  var addSnippet = function(snippetFile, editor) {
     if (!_snippetCache[snippetFile]) {
       _snippetCache[snippetFile] = true;
-      ace.config.loadModule('ace/ext/language_tools', function () {
+      ace.config.loadModule('ace/ext/language_tools', function() {
         var snippetManager = ace.require("ace/snippets").snippetManager;
         editor.setOption("enableSnippets", true)
         editor.setOption("enableBasicAutocompletion", true)
-        $.ajax(snippetFile).then(function (data) {
+        $.ajax(snippetFile).then(function(data) {
           _snippetCache[snippetFile] = data;
-          snippetManager.register(snippetManager.parseSnippetFile(data))
-        }).fail(function () {
+          snippetManager.register(snippetManager.parseSnippetFile(
+            data))
+        }).fail(function() {
           console.error("unable to load snippt " + snippetFile);
         })
       });
@@ -101,6 +102,14 @@
         _editors[name] = editor;
       }
       _createEditorMutation($el[0], editor)
+      var attrs = $el.data();
+      Object.keys(attrs).forEach(function(attr) {
+        var match = attr.match(/^on([A-Z][a-z]+)/);
+        if (match) {
+          var evnt = match[1][0].toLowerCase() + match[1].substring(1);
+          editor.getSession().on(evnt, window[attrs[attr]]);
+        }
+      })
       return editor;
     }
   }

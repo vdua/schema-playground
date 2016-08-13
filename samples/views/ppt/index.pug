@@ -2,7 +2,7 @@ extends ../layouts/main
 block title
   title Markdown Presentation
 append styles
-  link(rel="stylesheet", href="/samples/ppt/resources/css/styles.css", media="screen", title="no title")
+  link(rel="stylesheet", href="/samples/ppt/resources/css/styles.css", media="screen")
 block content
   .container#container(data-snippet= slide)
     if !readOnly
@@ -12,22 +12,11 @@ block content
           button.btn.glyphicon.glyphicon-floppy-disk#save(type="button",  name="button" data-url= "/presenter/" + presenter + "/" + presentation data-tool="save", data-method="post" data-data="editors.getData()")
           if slide
             button.btn.glyphicon.glyphicon-play#presentation(type="button",  name="button" data-snippet= snippetName data-tool="tutorial")
-    .row
-      .col-md-8.col-md-offset-2
-        #slide.slide
-          if slide && slide.htmlSlide
-            if !readOnly
-              .edit.glyphicon.glyphicon-pencil
-            .content(data-snippet-el="htmlSlide") !{slide && slide.htmlSlide}
-        if !readOnly
-          #edit-slide(class= (slide ? "hidden" : ""))
-            ul.nav.nav-tabs
-              li.active
-                a#edit-nav(href="#slide-editor" data-toggle="tab") Edit
-              li
-                a#preview-nav(href="#slide-preview" data-toggle="tab") Preview
-            .tab-content
-              #slide-editor.editor.tab-pane.active(data-snippet-el="slide" data-editor data-mode="markdown")
-              #slide-preview.slide.tab-pane(data-snippet-el="htmlSlide")
+  #slide-editor-container.row
+    .col-md-4
+      #slide-editor.editor(data-snippet-el="slide" data-editor data-mode="markdown" data-on-change="createSlideShow")
+    .col-md-8
+      #slide-preview
 append scripts
+  script(src="/samples/ppt/resources/third-party/remark/remark.js" charset="utf-8")
   script(src="/samples/ppt/resources/js/scripts.js", charset="utf-8")
