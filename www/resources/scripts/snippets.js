@@ -10,6 +10,16 @@
           s.$el.attr("data-config", data[snip + "Config"]);
         }
       });
+    },
+    getData: function(data) {
+      var data = editors.getData();
+      Object.keys(_snippets).forEach(function(sn) {
+        var snip = _snippets[sn]
+        if (snip.type === "contenteditable") {
+          data[sn] = snip.$el.text();
+        }
+      });
+      return data;
     }
   };
 
@@ -23,6 +33,15 @@
     };
     if (target.hasAttribute("data-editor")) {
       snippet.type = "editor";
+    }
+    if (target.hasAttribute("data-content-editable")) {
+      snippet.type = "contenteditable"
+      $el.on("keydown", function(evnt) {
+        var keyCode = evnt.key || evnt.keyCode || evnt.which;
+        if (keyCode === "Enter" || keyCode === 13) {
+          evnt.preventDefault();
+        }
+      })
     }
     if (snippetName) {
       _snippets[snippetName] = snippet;

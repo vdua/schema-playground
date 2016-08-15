@@ -11,3 +11,12 @@ presenters :
       list: list
     data:
       slide: slide.md
+  schemaplayground:
+    store: data/schemaplayground
+    templates:
+      index: ajvplay
+    data:
+      title: title.txt
+      ajvoptions: ajvconfig.json
+      schema: schema.json
+      data: data.json

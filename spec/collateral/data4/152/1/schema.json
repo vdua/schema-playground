@@ -1,0 +1,11 @@
+{
+  "type" : "object",
+  "properties" : {
+    "prop1":{
+      "type" : "string`",
+      "enum" : ["x", "y", "z"],
+      "enumNames" : ["x", "y", "z"]
+    }    
+  },
+  "required" : ["prop1"]
+}

@@ -1,0 +1,52 @@
+scope json
+snippet string
+	"$1":{
+		"type" : "string",
+		"maxLength" : $2,
+		"minLength" : $3,
+		"pattern" : "$4",
+		"format" : "$5"
+	}
+snippet enum
+	"$1":{
+		"type" : "string`",
+		"enum" : [$2],
+		"enumNames" : [$3]
+	}
+snippet number
+	"$1":{
+		"type" : "number",
+		"multipleOf" : $2,
+		"maximum" : $3,
+		"exclusiveMaximum" : $4,
+		"minimum" : $5,
+		"exclusiveMinimum" : $6
+	}
+snippet array
+	"$1":{
+		"type" : "array",
+		"minItems" : 1,
+		"maxItems" : 1,
+		"items" : {$2},
+		"additionalItems" : true,
+		"uniqueItems" : false
+	}
+	snippet array2
+		"$1":{
+			"type" : "array",
+			"minItems" : 1,
+			"maxItems" : 1,
+			"items" : [$2],
+			"additionalItems" : true,
+			"uniqueItems" : false
+		}
+snippet object
+	"$1":{
+		"type" : "object",
+		"maxProperties" : $2,
+		"minProperties" : $3,
+		"properties" : {
+			$4
+		},
+		"required" : [$5]
+	}

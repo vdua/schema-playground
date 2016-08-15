@@ -6,7 +6,7 @@ const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
 describe("Snippet Suite", function() {
   var oneFileSnippet, multiFileSnippet, markdownFileSnippet,
-    writableSnippet;
+    writableSnippet, txtFileSnippet;
 
   beforeEach(function() {
     oneFileSnippet = snippet.newSnippet({
@@ -28,6 +28,14 @@ describe("Snippet Suite", function() {
         "form": "form.json",
         "test": "test.json",
         "description": "description.md"
+      }
+    });
+    txtFileSnippet = snippet.newSnippet({
+      store: path.resolve("spec/collateral/data4"),
+      data: {
+        "schema": "schema.json",
+        "test": "test.json",
+        "title": "title.txt"
       }
     });
     writableSnippet = snippet.newSnippet({
@@ -288,7 +296,7 @@ describe("Snippet Suite", function() {
     var directory = 150;
     var snippetName = directory.toString(36)
     oneFileSnippet.loadSnippet(snippetName).then((result) => {
-      expect(Object.keys(result).length).toEqual(2);
+      expect(Object.keys(result).length).toEqual(1);
       expect(result.data.form).toEqual(fs.readFileSync(path.resolve(
         "spec/collateral/data1/150/1/form.json"), 'utf-8'));
       expect(result.data.formConfig).toBeUndefined();
@@ -316,7 +324,7 @@ describe("Snippet Suite", function() {
     var directory = 151;
     var snippetName = directory.toString(36)
     oneFileSnippet.loadSnippet(snippetName).then((result) => {
-      expect(Object.keys(result).length).toEqual(2);
+      expect(Object.keys(result).length).toEqual(1);
       expect(result.data.form).toEqual(fs.readFileSync(path.resolve(
         "spec/collateral/data1/151/1/form.json"), "utf-8"));
       expect(result.data.formConfig).toBeUndefined();
@@ -332,7 +340,7 @@ describe("Snippet Suite", function() {
     var directory = 150;
     var snippetName = directory.toString(36)
     oneFileSnippet.loadSnippet(snippetName, 3).then((result) => {
-      expect(Object.keys(result).length).toEqual(2);
+      expect(Object.keys(result).length).toEqual(1);
       expect(result.data.form).toEqual(fs.readFileSync(path.resolve(
         "spec/collateral/data1/150/3/form.json"), "utf-8"));
       expect(result.data.formConfig).toEqual(fs.readFileSync(path.resolve(
@@ -417,6 +425,21 @@ describe("Snippet Suite", function() {
     })
   });
 
+  // Text File Snippet
+  it("loadSnippet test 8", function(done) {
+    var directory = 152;
+    var snippetName = directory.toString(36)
+    txtFileSnippet.loadSnippet(snippetName).then((result) => {
+      var filePath = [txtFileSnippet.store, directory, 1].join(
+        "/")
+      expect(result.data).toHaveKeys(6);
+      expect(result.data.title).equalsFileContents([filePath,
+        "title.txt"
+      ].join("/"))
+      done();
+    })
+  });
+
   //updating non existent snippet
   it("_updateSnippet test 1", function(done) {
     var directory = 147;
@@ -482,8 +505,27 @@ describe("Snippet Suite", function() {
     })
   })
 
-  //passing more snippet data creates files
+  // passing empty string should not create any file
   it("_updateSnippet test 5", function(done) {
+    var directory = 147;
+    var snippetName = directory.toString(36);
+    mkdirp.sync(`tmp/${directory}`);
+    writableSnippet._updateSnippet(snippetName, {
+      form: "form",
+      test: ""
+    }).then(() => {
+      expect("form").equalsFileContents(
+        `tmp/${directory}/1/form.json`)
+      expect(`tmp/${directory}/1/`).fileCount(1)
+      rimraf.sync(`tmp/${directory}`);
+      done();
+    }).catch((e) => {
+      console.error(e);
+    })
+  })
+
+  //passing more snippet data creates files
+  it("_updateSnippet test 6", function(done) {
     var directory = 147;
     var snippetName = directory.toString(36);
     mkdirp.sync(`tmp/${directory}`);
@@ -504,7 +546,7 @@ describe("Snippet Suite", function() {
   })
 
   //updating an existing version
-  it("_updateSnippet test 5", function(done) {
+  it("_updateSnippet test 7", function(done) {
     var directory = 147;
     var snippetName = directory.toString(36);
     mkdirp.sync(`tmp/${directory}`);
