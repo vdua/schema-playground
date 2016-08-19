@@ -20,3 +20,38 @@ presenters :
       ajvoptions: ajvconfig.json
       schema: schema.json
       data: data.json
+    defaults:
+      ajvoptions: >-
+        {
+          "ajvOptions" : {
+            "v5": false,
+            "allErrors": false,
+            "verbose": false,
+            "jsonPointers": false,
+            "uniqueItems": true,
+            "unicode": true,
+            "format": "fast",
+            "formats": {},
+            "schemas": {},
+            "missingRefs": true,
+            "extendRefs": true,
+            "loadSchema": null,
+            "removeAdditional": false,
+            "useDefaults": false,
+            "coerceTypes": false,
+            "async": null,
+            "transpile": null,
+            "meta": true,
+            "validateSchema": true,
+            "addUsedSchema": true,
+            "inlineRefs": true,
+            "passContext": false,
+            "loopRequired": null,
+            "ownProperties": false,
+            "multipleOfPrecision": false,
+            "errorDataPath": "object",
+            "messages": true,
+            "beautify": false,
+            "cache": null
+          }
+        }

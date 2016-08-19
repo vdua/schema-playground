@@ -104,10 +104,15 @@
       _createEditorMutation($el[0], editor)
       var attrs = $el.data();
       Object.keys(attrs).forEach(function(attr) {
-        var match = attr.match(/^on([A-Z][a-z]+)/);
+        var match = attr.match(/^on((?:Editor)?[A-Z][a-z]+)/);
         if (match) {
-          var evnt = match[1][0].toLowerCase() + match[1].substring(1);
-          editor.getSession().on(evnt, window[attrs[attr]]);
+          var evnt = match[1].toLowerCase();
+          if (evnt.startsWith("editor")) {
+            evnt = evnt.substring(6) //"editor".length
+            editor.on(evnt, window[attrs[attr]])
+          } else {
+            editor.getSession().on(evnt, window[attrs[attr]]);
+          }
         }
       })
       return editor;

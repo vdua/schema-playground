@@ -1,4 +1,20 @@
 (function () {
+  var createBootstrapAlert = function (msg, type, dismiss) {
+    var alrt  = $("<div></div>").attr({
+      "class" : "alert" + (dismiss ? " alert-dismissible" : "") + " alert-" + type,
+      "role" : "alert"
+    }).text(msg)
+    if (dismiss) {
+      var btn = $("<button/>").attr({
+        type :"button",
+        "class": "close",
+        "data-dismiss" :"alert",
+        "aria-label" : "Close"
+      }).append('<span aria-hidden="true">&times;</span>');
+      alrt.append(btn);
+    }
+    return alrt;
+  }
   window.utils = {
     copyObject : function (src, dest, exceptions) {
       var isException = function (prop) {
@@ -36,12 +52,23 @@
       });
       return dest;
     },
+
     getQueryValue : function (q) {
       var regex = new RegExp("[?&]"+q+"=([^&]*)");
       var match = window.location.search.match(regex);
       if (match && match.length == 2) {
         return match[1];
       }
+    },
+
+    showError : function (msg, container, dismiss) {
+      var alrt = createBootstrapAlert(msg, "danger", dismiss);
+      container.append(alrt);
+    },
+
+    showSuccess : function (msg, container, dismiss) {
+      var alrt = createBootstrapAlert(msg, "success", dismiss);
+      container.append(alrt);
     }
   }
 }())

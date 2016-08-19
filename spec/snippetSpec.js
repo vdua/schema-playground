@@ -6,13 +6,23 @@ const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
 describe("Snippet Suite", function() {
   var oneFileSnippet, multiFileSnippet, markdownFileSnippet,
-    writableSnippet, txtFileSnippet;
+    writableSnippet, txtFileSnippet, defaultContentSnippet;
 
   beforeEach(function() {
     oneFileSnippet = snippet.newSnippet({
       store: path.resolve("spec/collateral/data1"),
       data: {
         "form": "form.json"
+      }
+    });
+    defaultContentSnippet = snippet.newSnippet({
+      store: path.resolve("spec/collateral/data1"),
+      data: {
+        "form": "form.json",
+        "test" : "test.json"
+      },
+      defaults : {
+        "test" : '"This is the default content"'
       }
     });
     multiFileSnippet = snippet.newSnippet({
@@ -613,4 +623,41 @@ describe("Snippet Suite", function() {
       }
     )
   })
+
+  it("default content test 1", function (done) {
+    var directory = 150;
+    var snippetName = directory.toString(36)
+    defaultContentSnippet.loadSnippet(snippetName).then((result) => {
+      var filePath = [defaultContentSnippet.store, directory, 1].join(
+        "/")
+      expect(result.data).toHaveKeys(4);
+      expect(result.data.form).equalsFileContents([filePath,
+        "form.json"
+      ].join("/"))
+      expect(result.data.test).toEqual(defaultContentSnippet.defaults.test)
+      done();
+    }).catch((err) => {
+      console.log(err);
+    })
+  });
+
+  it("default content test 2", function (done) {
+    var directory = 151;
+    var snippetName = directory.toString(36)
+    defaultContentSnippet.loadSnippet(snippetName).then((result) => {
+      var filePath = [defaultContentSnippet.store, directory, 1].join(
+        "/")
+      expect(result.data).toHaveKeys(4);
+      expect(result.data.form).equalsFileContents([filePath,
+        "form.json"
+      ].join("/"))
+      expect(result.data.test).equalsFileContents([filePath,
+        "test.json"
+      ].join("/"))
+      done();
+    }).catch((err) => {
+      console.log(err);
+    })
+  });
+
 })
